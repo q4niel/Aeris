@@ -1,0 +1,12 @@
+*
+
+!build/
+!build/**/*
+build/out
+
+!src/
+!src/**/*
+
+!.gitignore
+!license.md
+!readme.md
