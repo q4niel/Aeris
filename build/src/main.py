@@ -43,7 +43,7 @@ def main() -> None:
 
     (
         builder
-        .setBinName(Config.binaryName + (".exe" if int(sys.argv[1]) == OS.WINDOWS else ""))
+        .setBinName(Config.binaryName + (".exe" if int(sys.argv[1]) == OS.WINDOWS.value else ""))
         .setBuildDirectory(f"{projDir}/build/out")
         .build()
     )
