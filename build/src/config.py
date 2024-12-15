@@ -4,6 +4,7 @@ from typing import List
 
 class Config:
     binaryName:str = ""
+    buildDataPath:str = ""
     sources:List[str] = []
 
     class Version:
@@ -19,6 +20,7 @@ class Config:
             data:dict = tomllib.load(file)
 
             Config.binaryName = data["binaryName"]
+            Config.buildDataPath = data["buildDataPath"]
             Config.sources = data["sources"]
 
             Config.Version.major = data["version"]["major"]

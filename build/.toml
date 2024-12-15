@@ -1,5 +1,6 @@
 binaryName = "aeris"
-sources = ["main", "util/hello"]
+buildDataPath = "build_data"
+sources = ["main", "commands"]
 
 [version]
 major = 0

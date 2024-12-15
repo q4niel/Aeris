@@ -5,6 +5,22 @@ from platform import OS
 import compiler
 import shutil
 
+def generateBuildData() -> None:
+    path:str = f"{sys.argv[2]}/src/{Config.buildDataPath}.h"
+
+    if (os.path.exists(path)):
+        os.remove(path)
+
+    with open(path, "w") as file:
+        file.write (
+            f"#pragma once\n"
+            f"#define MAJOR_VERSION {Config.Version.major}\n"
+            f"#define MINOR_VERSION {Config.Version.minor}\n"
+            f"#define PATCH_VERSION {Config.Version.patch}"
+        )
+
+    return
+
 def main() -> None:
     projDir:str = sys.argv[2]
 
@@ -12,10 +28,12 @@ def main() -> None:
         print(f"error while loading data from {projDir}/build/.toml")
         return
 
+    generateBuildData()
 
     tmpDir:str = f"{projDir}/build/tmp"
     srcDir:str = f"{projDir}/src"
     outDir:str = f"{projDir}/build/out"
+
 
     os.mkdir(tmpDir)
 

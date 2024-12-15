@@ -1,16 +1,6 @@
-#include "util/hello.h"
-#include <stdlib.h>
+#include "commands.h"
 
-int main() {
-    hello();
-
-#ifdef PLATFORM_LINUX
-    system("read -n 1 -s -p \"Press any key to continue...\" && echo \"\n\"");
-#endif
-
-#ifdef PLATFORM_WINDOWS
-    system("pause");
-#endif
-
+int main(const int argc, const char *argv[]) {
+    evaluateCommands(argc - 1, argv + 1);
     return 0;
 }

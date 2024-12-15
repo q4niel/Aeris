@@ -6,6 +6,7 @@ build/out
 
 !src/
 !src/**/*
+src/build_data.h
 
 !.gitignore
 !license.md
