@@ -1,8 +1,11 @@
 binaryName = "aeris"
-buildDataPath = "build_data"
 sources = ["main", "commands"]
 
 [version]
 major = 0
 minor = 0
 patch = 0
+
+[datagen]
+path = "datagen"
+version = "version"

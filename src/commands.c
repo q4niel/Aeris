@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "commands.h"
-#include "build_data.h"
+#include "../datagen/version.h"
 
 void evaluateCommands(const int cmdc, const char *cmdv[]) {
     for (int i = 0; i < cmdc; i++) {
