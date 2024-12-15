@@ -5,7 +5,7 @@ int main() {
     hello();
 
 #ifdef PLATFORM_LINUX
-    system("read -n 1 -s -p \"Press any key to continue...\" && echo \n");
+    system("read -n 1 -s -p \"Press any key to continue...\" && echo \"\n\"");
 #endif
 
 #ifdef PLATFORM_WINDOWS
