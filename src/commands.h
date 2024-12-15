@@ -1,6 +1,13 @@
 #pragma once
+#include <stdbool.h>
 
-void evaluateCommands(const int cmdc, const char *cmdv[]);
+void invalidCmd();
+
+#define HELP_CMD "--help"
+void helpCmd();
 
 #define VERSION_CMD "--version"
-void echoVersion();
+void versionCmd();
+
+#define TRANSPILE_CMD "--transpile"
+void transpileCmd(const char **cmdv, bool output);
