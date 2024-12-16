@@ -19,7 +19,7 @@ int main(const int argc, const char **argv) {
 
         case 2: {
             if (strcmp(inputs[1], TRANSPILE_CMD) == 0) {
-                transpileCmd(inputs, false);
+                transpileCmd(inputs[0], NULL);
             }
             else invalidCmd();
             break;
@@ -27,7 +27,7 @@ int main(const int argc, const char **argv) {
 
         case 3: {
             if (strcmp(inputs[1], TRANSPILE_CMD) == 0) {
-                transpileCmd(inputs, true);
+                transpileCmd(inputs[0], inputs[2]);
             }
             else invalidCmd();
             break;

@@ -10,4 +10,4 @@ void helpCmd();
 void versionCmd();
 
 #define TRANSPILE_CMD "--transpile"
-void transpileCmd(const char **cmdv, bool output);
+void transpileCmd(const char *input, const char *output);

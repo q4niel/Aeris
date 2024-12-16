@@ -1,5 +1,5 @@
 binaryName = "aeris"
-sources = ["main", "commands"]
+sources = ["main", "commands", "util/code/fio"]
 
 [version]
 major = 0
