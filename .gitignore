@@ -7,7 +7,6 @@ build/out
 !src/
 !src/**/*
 
-!.gitattributes
 !.gitignore
 !license.md
 !readme.md
