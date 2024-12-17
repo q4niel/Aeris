@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "../datagen/version.h"
 #include "util/fio.h"
+#include "util/token.h"
 
 void invalidCmd() {
     printf("Invalid Usage - Use '--help' for more information\n");
@@ -17,12 +18,37 @@ void versionCmd() {
 }
 
 void transpileCmd(const char *input, const char *output) {
-    int count = 0;
-    char *array = NULL;
-    if (!fio.parse(input, &count, &array)) {
+    int charc = 0;
+    char *charv = NULL;
+    if (!fio.parse(input, &charc, &charv)) {
         printf("Failed to parse file: %s\n", input);
         return;
     }
 
-    free(array);
+    int tokenc = 0;
+    Token *tokenv = NULL;
+    if (!tokenize(&charc, &charv, &tokenc, &tokenv)) {
+        printf("Failed to tokenize file: %s\n", input);
+        return;
+    }
+
+    for (int i = 0; i < tokenc; i++) {
+        printf (
+            "%s %s\n",
+            tokenTypeToString(tokenv[i].type),
+            tokenv[i].type == SYMBOL ? (char*)tokenv[i].data : ""
+        );
+    }
+
+    for (int i = 0; i < tokenc; i++) {
+        switch (tokenv[i].type) {
+            case SYMBOL:
+            // case INT_LITERAL:
+                free(tokenv[i].data);
+
+            default: continue;
+        }
+    }
+    free(tokenv);
+    free(charv);
 }
