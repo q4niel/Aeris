@@ -3,6 +3,9 @@
 !src/
 !src/**/*
 
+!task/
+!task/**/*
+
 !.gitignore
 !LICENSE
 !readme.md

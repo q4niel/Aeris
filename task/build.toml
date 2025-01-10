@@ -1,0 +1,9 @@
+[flags]
+debug = ["-DDEBUG"]
+release = []
+linux = ["-DPLATFORM_LINUX"]
+windows = ["-DPLATFORM_WINDOWS"]
+
+[[srcEntries]]
+dir = "src"
+srcs = ["main"]
