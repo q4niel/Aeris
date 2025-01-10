@@ -1,5 +1,8 @@
 *
 
+!src/
+!src/**/*
+
 !.gitignore
 !LICENSE
 !readme.md
