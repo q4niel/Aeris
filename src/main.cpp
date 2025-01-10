@@ -10,6 +10,7 @@ int main(int argc, char **argv) {
 
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
+#include <stdio.h>
 
 int WinMain (
     HINSTANCE hInstance,
