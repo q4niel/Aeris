@@ -4,14 +4,14 @@ import tomllib
 import shutil
 from typing import TypedDict, List
 
-class Globals:
+class Data:
     projDir:str
     isDebug:bool
-    data:dict
+    toml:dict
 
     @staticmethod
     def init() -> None:
-        Globals.isDebug = (
+        Data.isDebug = (
             True if input (
                 "Debug: 1\n"
                 "Release: 2\n"
@@ -20,14 +20,15 @@ class Globals:
             else False
         )
 
-        Globals.projDir = os.path.dirname (
+        Data.projDir = os.path.dirname (
             os.path.dirname (
                 os.path.abspath(sys.argv[0])
             )
         )
+        os.chdir(Data.projDir)
 
-        with open(f"{Globals.projDir}/task/build.toml", "rb") as toml:
-            Globals.data = tomllib.load(toml)
+        with open(f"{Data.projDir}/task/build.toml", "rb") as toml:
+            Data.toml = tomllib.load(toml)
 
         return
 
@@ -35,35 +36,54 @@ def getFlags() -> str:
     allFlags:str = ""
 
     for flag in (
-        Globals.data["flags"]["debug"] if Globals.isDebug else
-        Globals.data["flags"]["release"]
+        Data.toml["flags"]["debug"] if Data.isDebug else
+        Data.toml["flags"]["release"]
     ): allFlags += f"{flag} "
 
     for flag in (
-        Globals.data["flags"]["linux"] if os.name == "posix" else
-        Globals.data["flags"]["windows"]
+        Data.toml["flags"]["linux"] if os.name == "posix" else
+        Data.toml["flags"]["windows"]
     ): allFlags += f"{flag} "
 
     return allFlags
 
 def compilation() -> None:
-    for srcEntry in Globals.data["srcEntries"]:
+    for srcEntry in Data.toml["srcEntries"]:
         for src in srcEntry["srcs"]:
             
-            source:str = f"{Globals.projDir}/{srcEntry["dir"]}/{src}.cpp"
-            out:str = f"{Globals.projDir}/tmp/{src}.o"
+            source:str = f"{Data.projDir}/{srcEntry["dir"]}/{src}.cpp"
+            out:str = f"{Data.projDir}/tmp/{src}.o"
             os.system(f"clang++ {getFlags()} -c {source} -o {out}")
     return
 
-def main() -> None:
-    Globals.init()
+def linking() -> None:
+    allObjects:str = ""
+    for srcEntry in Data.toml["srcEntries"]:
+        for src in srcEntry["srcs"]:
+            allObjects += f"{Data.projDir}/tmp/{src}.o "
 
-    os.chdir(Globals.projDir)
-    if not os.path.exists("tmp"): os.mkdir("tmp")
+    out:str = f"{Data.projDir}/{Data.toml["buildDir"]}/main"
+    ext:str = "" if os.name == "posix" else ".exe"
+
+    os.system(f"clang++ {allObjects} -o {out}{ext}")
+    return
+
+def main() -> None:
+    Data.init()
+
+    if not os.path.exists("tmp"):
+        os.mkdir("tmp")
+
+    if os.path.exists(Data.toml["buildDir"]):
+        shutil.rmtree(Data.toml["buildDir"])
+    os.mkdir(Data.toml["buildDir"])
 
     compilation()
+    linking()
 
-    if os.path.exists("tmp"): shutil.rmtree("tmp")
+    if os.path.exists("tmp"):
+        shutil.rmtree("tmp")
+
     return
 
 if __name__ == "__main__": main()

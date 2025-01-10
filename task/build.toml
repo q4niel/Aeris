@@ -1,3 +1,5 @@
+buildDir = "out"
+
 [flags]
 debug = ["-DDEBUG"]
 release = []
