@@ -1,22 +1,22 @@
 #pragma once
 
 #ifdef DEBUG
-#define IMPLEMENTATION ;
+#define NO_IMPL ;
 #else
-#define IMPLEMENTATION {}
+#define NO_IMPL {}
 #endif
 
 namespace io {
     template<typename T, typename ...Args>
-    void write(T t, Args ...args)IMPLEMENTATION
+    void write(T t, Args ...args)NO_IMPL
 
     template<typename ...Args>
-    void print(Args ...args)IMPLEMENTATION
+    void print(Args ...args)NO_IMPL
 
     template<typename ...Args>
-    void trace(Args ...args)IMPLEMENTATION
+    void trace(Args ...args)NO_IMPL
 
-    void newline(unsigned int count)IMPLEMENTATION
+    void newline(unsigned int count)NO_IMPL
 }
 
 #ifdef DEBUG
