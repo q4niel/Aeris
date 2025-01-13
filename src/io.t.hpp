@@ -3,7 +3,7 @@
 #include <iostream>
 
 template<typename T, typename ...Args>
-void io::write(T t, Args ...args) {
+void ars::write(T t, Args ...args) {
     std::cout << t;
     if constexpr (sizeof ...(Args) > 0) {
         write(args...);
@@ -11,20 +11,20 @@ void io::write(T t, Args ...args) {
 }
 
 template<typename ...Args>
-void io::print(Args ...args) {
+void ars::print(Args ...args) {
     write(args...);
     newline(1);
 }
 
 template<typename ...Args>
-void io::trace(Args ...args) {
+void ars::trace(Args ...args) {
     for (const auto &arg : {args...}) {
         write(arg);
         newline(1);
     }
 }
 
-void io::newline(unsigned int count = 1) {
+void ars::newline(unsigned int count = 1) {
     while (count --> 0) {
         std::cout << '\n';
     }
