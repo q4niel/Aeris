@@ -6,7 +6,7 @@
 #define NO_IMPL {}
 #endif
 
-namespace io {
+namespace ars {
     template<typename T, typename ...Args>
     void write(T t, Args ...args)NO_IMPL
 
