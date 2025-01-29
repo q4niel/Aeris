@@ -3,9 +3,11 @@
 !src/
 !src/**/*
 
-!task/
-!task/**/*
+!tsk/
+!tsk/**/*
 
 !.gitignore
 !LICENSE
 !readme.md
+!task.bat
+!task.sh

@@ -27,7 +27,7 @@ class Data:
         )
         os.chdir(Data.projDir)
 
-        with open(f"{Data.projDir}/task/build.toml", "rb") as toml:
+        with open(f"{Data.projDir}/tsk/build.toml", "rb") as toml:
             Data.toml = tomllib.load(toml)
 
         return
