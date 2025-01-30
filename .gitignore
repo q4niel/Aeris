@@ -3,8 +3,9 @@
 !src/
 !src/**/*
 
-!tsk/
-!tsk/**/*
+!task/
+!task/**/*
+task/env
 
 !.gitignore
 !LICENSE

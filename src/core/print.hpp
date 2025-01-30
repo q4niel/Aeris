@@ -1,4 +1,5 @@
 #pragma once
+#include "../aeris_api.hpp"
 
 namespace ars__ {
     template<typename T, typename ...Args>
@@ -10,7 +11,7 @@ namespace ars__ {
     template<typename ...Args>
     void printlns__(Args ...args);
 
-    void printsep__(unsigned int count);
+    AERIS_API void printsep__(unsigned int count);
 }
 
 #include "print.t.hpp"

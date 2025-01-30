@@ -23,9 +23,3 @@ void ars__::printlns__(Args ...args) {
         printsep__(1);
     }
 }
-
-void ars__::printsep__(unsigned int count = 1) {
-    while (count --> 0) {
-        std::cout << '\n';
-    }
-}
