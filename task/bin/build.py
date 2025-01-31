@@ -1,6 +1,7 @@
 import sys
 import os
 import shutil
+import re
 from typing import List
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
@@ -56,18 +57,37 @@ def main() -> None:
 
     Globals.cfg = lua.parse("task/cfg/build.lua")
 
-    Globals.tmp = "task/bin/tmp"
-    Globals.out = f"out/{Globals.cfg["version"]["major"]}_{Globals.cfg["version"]["minor"]}_{Globals.cfg["version"]["patch"]}"
+    Globals.tmp = "tmp"
+    Globals.out = f"out/aeris_v{Globals.cfg["version"]["major"]}.{Globals.cfg["version"]["minor"]}.{Globals.cfg["version"]["patch"]}"
 
     path.hardDir(Globals.tmp)
     path.safeDir("out")
     path.hardDir(Globals.out)
-    path.hardDir(f"{Globals.out}/src")
     path.hardDir(f"{Globals.out}/bin")
+    path.hardDir(f"{Globals.out}/inc")
+    path.hardDir(f"{Globals.out}/res")
 
     for res in lua.makeList(Globals.cfg["resources"]):
         shutil.copy(res["src"], f"{Globals.out}/{res["dst"]}")
-    
+
+    for inc in lua.makeList(Globals.cfg["includes"]):
+        dst = f"{Globals.out}/inc/{os.path.basename(inc)}"
+        shutil.copy(inc, dst)
+
+        def replace(match) -> str:
+            return f'#include "{os.path.basename(match.group(2))}"'
+
+        with open(dst, 'r+') as file:
+            content:str = file.read()
+            file.seek(0)
+
+            file.write(re.sub (
+                r'(#include\s+"([^"]+)")',
+                replace,
+                content
+            ))
+            file.truncate()
+
     flags = lua.makeList(Globals.cfg["flags"]) + [Globals.platformFlag]
     link("_d", flags + ["-DDEBUG"])
     link("", flags + ["-DRELEASE"])

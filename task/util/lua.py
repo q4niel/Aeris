@@ -7,7 +7,7 @@ def parse(file:str) -> dict:
 
     runtime = LuaRuntime(unpack_returned_tuples=True)
     
-    with open(f"{file}.lua", "rb") as f:
+    with open(f"{file}.lua", "r") as f:
         runtime.execute(f.read())
 
     return runtime.globals()
