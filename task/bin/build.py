@@ -66,9 +66,13 @@ def main() -> None:
     path.hardDir(f"{Globals.out}/bin")
     path.hardDir(f"{Globals.out}/inc")
     path.hardDir(f"{Globals.out}/res")
+    path.hardDir(f"{Globals.out}/task")
 
-    for res in lua.makeList(Globals.cfg["resources"]):
-        shutil.copy(res["src"], f"{Globals.out}/{res["dst"]}")
+    for res in lua.makeList(Globals.cfg["transfer"]):
+        if (os.path.isdir(res["src"])):
+            shutil.copytree(res["src"], f"{Globals.out}/{res["dst"]}")
+        else:
+            shutil.copy(res["src"], f"{Globals.out}/{res["dst"]}")
 
     for inc in lua.makeList(Globals.cfg["includes"]):
         dst = f"{Globals.out}/inc/{os.path.basename(inc)}"

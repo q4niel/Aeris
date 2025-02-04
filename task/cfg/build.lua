@@ -4,9 +4,14 @@ version = {
     patch = 0
 }
 
-resources = {
+transfer = {
     {src = "src/res/main__.hpp", dst = "res/main__.hpp"},
     {src = "src/res/main__.cpp", dst = "res/main__.cpp"},
+    {src = "task/util", dst = "task/util"},
+    {src = "task/requirements.txt", dst = "task/requirements.txt"},
+    {src = "task/run.bat", dst = "task/run.bat"},
+    {src = "task/run.ps1", dst = "task/run.ps1"},
+    {src = "task/run.sh", dst = "task/run.sh"}
 }
 
 includes = {
