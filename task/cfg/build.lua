@@ -21,7 +21,7 @@ binaries = {
     {
         name = "Aeris" .. version.major .. "-Core",
         type = "shared",
-        flags = {"-DBUILD_AERIS_API"},
+        flags = {"-fvisibility=hidden", "-DBUILD_AERIS_API"},
         libraries = {},
         srcs = {"src/eng/core/print"}
     }

@@ -5,7 +5,7 @@
         #define AERIS_API __declspec(dllexport)
     #endif
     #ifdef PLATFORM_LINUX
-        #define AERIS_API
+        #define AERIS_API __attribute__((visibility("default")))
     #endif
 #else
     #ifdef PLATFORM_WINDOWS
