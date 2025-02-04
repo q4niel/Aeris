@@ -5,8 +5,10 @@ version = {
 }
 
 transfer = {
-    {src = "src/res/main__.hpp", dst = "res/main__.hpp"},
-    {src = "src/res/main__.cpp", dst = "res/main__.cpp"},
+    {src = "src/res", dst = "res"},
+
+    {src = "src/task/bin/new_project.py", dst = "task/bin/New-Project"},
+
     {src = "task/util", dst = "task/util"},
     {src = "task/requirements.txt", dst = "task/requirements.txt"},
     {src = "task/run.bat", dst = "task/run.bat"},

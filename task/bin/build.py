@@ -65,8 +65,8 @@ def main() -> None:
     path.hardDir(Globals.out)
     path.hardDir(f"{Globals.out}/bin")
     path.hardDir(f"{Globals.out}/inc")
-    path.hardDir(f"{Globals.out}/res")
     path.hardDir(f"{Globals.out}/task")
+    path.hardDir(f"{Globals.out}/task/bin")
 
     for res in lua.makeList(Globals.cfg["transfer"]):
         if (os.path.isdir(res["src"])):
