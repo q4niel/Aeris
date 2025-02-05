@@ -12,7 +12,7 @@ from util import platform
 class Globals:
     cfg:dict = lua.parse("task/cfg/build.lua")
     tmpDir:str = "tmp"
-    outDir:str = f"out/{cfg["directory"]}"
+    outDir:str = f"out/{cfg["Directory"]}"
 
 def compile(flags:List[str], src:str) -> None:
     allFlags:str = " ".join(f"{flag}" for flag in flags)
@@ -34,10 +34,10 @@ def link(name:str, type:str, objs:List[str]) -> None:
     return
 
 def buildBinaries() -> None:
-    globalFlags:List[str] = lua.makeList(Globals.cfg["globalFlags"])
-    platformFlags:List[str] = lua.makeList(Globals.cfg["windowsFlags" if platform.get() == platform.Platform.WINDOWS else "linuxFlags"])
+    globalFlags:List[str] = lua.makeList(Globals.cfg["GlobalFlags"])
+    platformFlags:List[str] = lua.makeList(Globals.cfg["WindowsFlags" if platform.get() == platform.Platform.WINDOWS else "LinuxFlags"])
 
-    for bin in lua.makeList(Globals.cfg["binaries"]):
+    for bin in lua.makeList(Globals.cfg["Binaries"]):
         srcs:List[str] = lua.makeList(bin["srcs"])
 
         for src in srcs:
@@ -61,7 +61,7 @@ def createDirectories() -> None:
     return
 
 def transferFiles() -> None:
-    for file in lua.makeList(Globals.cfg["transfer"]):
+    for file in lua.makeList(Globals.cfg["Transfer"]):
         if (os.path.isdir(file["src"])):
             shutil.copytree(file["src"], f"{Globals.outDir}/{file["dst"]}")
         else:
@@ -69,7 +69,7 @@ def transferFiles() -> None:
     return
 
 def transferIncludes() -> None:
-    for inc in lua.makeList(Globals.cfg["includes"]):
+    for inc in lua.makeList(Globals.cfg["Includes"]):
         dst = f"{Globals.outDir}/inc/{os.path.basename(inc)}"
         shutil.copy(inc, dst)
 
@@ -90,7 +90,7 @@ def transferIncludes() -> None:
 
 def transferBinaries() -> None:
     names:List[str] = []
-    for bin in lua.makeList(Globals.cfg["binaries"]):
+    for bin in lua.makeList(Globals.cfg["Binaries"]):
         names.append(bin["name"])
         names.append(bin["name"] + "_d")
 

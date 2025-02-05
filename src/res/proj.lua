@@ -1,6 +1,6 @@
-name = "__NAME__"
+Name = "__NAME__"
 
-systems = {
+Systems = {
     inits = {},
     procs = {},
     exits = {}
