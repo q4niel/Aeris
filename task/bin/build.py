@@ -7,75 +7,70 @@ from typing import List
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from util import path
 from util import lua
+from util import platform
 
 class Globals:
-    platformFlag:str = ""
-    executableExt:str = ""
-    dynamicExt:str = ""
-    staticExt:str = ""
-    cfg:dict = []
-    tmp:str = ""
-    out:str = ""
+    cfg:dict = lua.parse("task/cfg/build.lua")
+    tmpDir:str = "tmp"
+    outDir:str = f"out/{cfg["directory"]}"
 
-def link(outSuffix:str, flags:List[str]) -> None:
-    for bin in lua.makeList(Globals.cfg["binaries"]):
-        allFlags = " ".join(f"{flag}" for flag in flags + lua.makeList(bin["flags"]))
-        srcs = lua.makeList(bin["srcs"])
-
-        for src in srcs:
-            os.system(f"clang++ {allFlags} -c {src}.cpp -o {Globals.tmp}/{os.path.basename(src)}.o")
-
-        allLibs = " ".join(f"{lib}{Globals.staticExt}" for lib in lua.makeList(bin["libraries"]))
-        allObjs = " ".join(f"{Globals.tmp}/{os.path.basename(src)}.o" for src in srcs)
-
-        match bin["type"]:
-            case "shared":
-                os.system(f"clang++ -shared {allLibs} {allObjs} -o {Globals.tmp}/{bin["name"]}{outSuffix}{Globals.dynamicExt}")
-            case "executable":
-                os.system(f"clang++ {allLibs} {allObjs} -o {Globals.tmp}/{bin["name"]}{outSuffix}{Globals.executableExt}")
-            case _:
-                print("Unsupported binary type")
+def compile(flags:List[str], src:str) -> None:
+    allFlags:str = " ".join(f"{flag}" for flag in flags)
+    os.system(f"clang++ {allFlags} -c {src}.cpp -o {Globals.tmpDir}/{os.path.basename(src)}.o")
     return
 
-def main() -> None:
-    os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+def link(name:str, type:str, objs:List[str]) -> None:
+    allObjs = " ".join(f"{Globals.tmpDir}/{os.path.basename(obj)}.o" for obj in objs)
 
-    match os.name:
-        case "posix":
-            Globals.platformFlag = "-DPLATFORM_LINUX"
-            Globals.executableExt = ""
-            Globals.dynamicExt = ".so"
-            Globals.staticExt = ".a"
-        case "nt":
-            Globals.platformFlag = "-DPLATFORM_WINDOWS"
-            Globals.executableExt = ".exe"
-            Globals.dynamicExt = ".dll"
-            Globals.staticExt = ".lib"
+    match type:
+        case "executable":
+            ext:str = ".exe" if platform.get() == platform.Platform.WINDOWS else ""
+            os.system(f"clang++ {allObjs} -o {Globals.tmpDir}/{bin["name"]}{ext}")
+        case "shared":
+            ext:str = ".dll" if platform.get() == platform.Platform.WINDOWS else ".so"
+            os.system(f"clang++ -shared {allObjs} -o {Globals.tmpDir}/{name}{ext}")
         case _:
-            print("Unsupported OS")
-            return
+            print("Error: Unsupported binary type!")
+    return
 
-    Globals.cfg = lua.parse("task/cfg/build.lua")
+def buildBinaries() -> None:
+    globalFlags:List[str] = lua.makeList(Globals.cfg["globalFlags"])
+    platformFlags:List[str] = lua.makeList(Globals.cfg["windowsFlags" if platform.get() == platform.Platform.WINDOWS else "linuxFlags"])
 
-    Globals.tmp = "tmp"
-    Globals.out = f"out/aeris_v{Globals.cfg["version"]["major"]}.{Globals.cfg["version"]["minor"]}.{Globals.cfg["version"]["patch"]}"
+    for bin in lua.makeList(Globals.cfg["binaries"]):
+        srcs:List[str] = lua.makeList(bin["srcs"])
 
-    path.hardDir(Globals.tmp)
+        for src in srcs:
+            compile(globalFlags + platformFlags + lua.makeList(bin["flags"]), src)
+        link(bin["name"], bin["type"], srcs)
+
+        for src in srcs:
+            compile(globalFlags + platformFlags + lua.makeList(bin["flags"]) + ["-DDEBUG"], src)
+        link(bin["name"] + "_d", bin["type"], srcs)
+
+    return
+
+def createDirectories() -> None:
+    path.hardDir(Globals.tmpDir)
     path.safeDir("out")
-    path.hardDir(Globals.out)
-    path.hardDir(f"{Globals.out}/bin")
-    path.hardDir(f"{Globals.out}/inc")
-    path.hardDir(f"{Globals.out}/task")
-    path.hardDir(f"{Globals.out}/task/bin")
+    path.hardDir(Globals.outDir)
+    path.hardDir(f"{Globals.outDir}/bin")
+    path.hardDir(f"{Globals.outDir}/inc")
+    path.hardDir(f"{Globals.outDir}/task")
+    path.hardDir(f"{Globals.outDir}/task/bin")
+    return
 
-    for res in lua.makeList(Globals.cfg["transfer"]):
-        if (os.path.isdir(res["src"])):
-            shutil.copytree(res["src"], f"{Globals.out}/{res["dst"]}")
+def transferFiles() -> None:
+    for file in lua.makeList(Globals.cfg["transfer"]):
+        if (os.path.isdir(file["src"])):
+            shutil.copytree(file["src"], f"{Globals.outDir}/{file["dst"]}")
         else:
-            shutil.copy(res["src"], f"{Globals.out}/{res["dst"]}")
+            shutil.copy(file["src"], f"{Globals.outDir}/{file["dst"]}")
+    return
 
+def transferIncludes() -> None:
     for inc in lua.makeList(Globals.cfg["includes"]):
-        dst = f"{Globals.out}/inc/{os.path.basename(inc)}"
+        dst = f"{Globals.outDir}/inc/{os.path.basename(inc)}"
         shutil.copy(inc, dst)
 
         def replace(match) -> str:
@@ -91,21 +86,34 @@ def main() -> None:
                 content
             ))
             file.truncate()
+    return
 
-    flags = lua.makeList(Globals.cfg["flags"]) + [Globals.platformFlag]
-    link("_d", flags + ["-DDEBUG"])
-    link("", flags + ["-DRELEASE"])
+def transferBinaries() -> None:
+    names:List[str] = []
+    for bin in lua.makeList(Globals.cfg["binaries"]):
+        names.append(bin["name"])
+        names.append(bin["name"] + "_d")
 
-    binaries:List[str] = []
-    for root, dirs, bins in os.walk(Globals.tmp):
+    for root, dirs, bins in os.walk(Globals.tmpDir):
         for bin in bins:
-            if bin.endswith(Globals.executableExt) or bin.endswith(Globals.dynamicExt) or bin.endswith(Globals.staticExt):
-                binaries.append(bin)
-    
-    for bin in binaries:
-        shutil.copy(f"{Globals.tmp}/{bin}", f"{Globals.out}/bin/{bin}")
+            if bin.split('.')[0] in names:
+                shutil.copy(f"{root}/{bin}", f"{Globals.outDir}/bin/{bin}")
 
-    path.delDir(Globals.tmp)
+    return
+
+def main() -> None:
+    os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+    if (platform.get() == platform.Platform.OTHER):
+        print("Error: Unsupported OS!")
+        return
+
+    createDirectories()
+    buildBinaries()
+    transferFiles()
+    transferIncludes()
+    transferBinaries()
+
+    path.delDir(Globals.tmpDir)
     return
 
 if __name__ == "__main__": main()

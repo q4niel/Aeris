@@ -4,6 +4,8 @@ version = {
     patch = 0
 }
 
+directory = "aeris_v" .. version.major .. "." .. version.minor .. "." .. version.patch
+
 transfer = {
     {src = "src/res", dst = "res"},
 
@@ -22,14 +24,15 @@ includes = {
     "src/eng/core/print.t.hpp"
 }
 
-flags = {"-std=c++23"}
+globalFlags = {"-std=c++23"}
+windowsFlags = {"-DPLATFORM_WINDOWS"}
+linuxFlags = {"-DPLATFORM_LINUX"}
 
 binaries = {
     {
         name = "Aeris" .. version.major .. "-Core",
         type = "shared",
         flags = {"-fvisibility=hidden", "-DBUILD_AERIS_API"},
-        libraries = {},
         srcs = {"src/eng/core/print"}
     }
 }
