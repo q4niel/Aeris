@@ -40,7 +40,7 @@ def main() -> None:
     with open(cfg, "r+") as file:
         content:str = file.read()
         file.seek(0)
-        file.write(content.replace("__NAME__", Globals.name))
+        file.write(content.replace("__PROJECT_NAME__", Globals.name))
         file.truncate()
 
     return

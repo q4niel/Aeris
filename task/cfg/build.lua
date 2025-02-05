@@ -9,6 +9,7 @@ Directory = "aeris_v" .. Version.major .. "." .. Version.minor .. "." .. Version
 Transfer = {
     {src = "src/res", dst = "res"},
 
+    {src = "src/task/bin/build_project.py", dst = "task/bin/Build-Project"},
     {src = "src/task/bin/new_project.py", dst = "task/bin/New-Project"},
 
     {src = "task/util", dst = "task/util"},
