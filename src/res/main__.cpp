@@ -1,10 +1,10 @@
-int entry() {
+int main__() {
     return 0;
 }
 
 #ifdef PLATFORM_LINUX
 int main(int argc, char **argv) {
-    return entry();
+    return main__();
 }
 #endif
 
@@ -24,6 +24,6 @@ int WinMain (
     if (freopen_s(&file, "CONOUT$", "w", stdout)) return 1;
     #endif
 
-    return entry();
+    return main__();
 }
 #endif
