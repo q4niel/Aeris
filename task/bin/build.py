@@ -5,8 +5,9 @@ import re
 from typing import List
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from util import path
+from util import clang
 from util import lua
+from util import path
 from util import platform
 
 class Globals:
@@ -14,39 +15,25 @@ class Globals:
     tmpDir:str = "tmp"
     outDir:str = f"out/{cfg["Directory"]}"
 
-def compile(flags:List[str], src:str) -> None:
-    allFlags:str = " ".join(f"{flag}" for flag in flags)
-    os.system(f"clang++ {allFlags} -c {src}.cpp -o {Globals.tmpDir}/{os.path.basename(src)}.o")
-    return
-
-def link(name:str, type:str, objs:List[str]) -> None:
-    allObjs = " ".join(f"{Globals.tmpDir}/{os.path.basename(obj)}.o" for obj in objs)
-
-    match type:
-        case "executable":
-            ext:str = ".exe" if platform.get() == platform.Platform.WINDOWS else ""
-            os.system(f"clang++ {allObjs} -o {Globals.tmpDir}/{bin["name"]}{ext}")
-        case "shared":
-            ext:str = ".dll" if platform.get() == platform.Platform.WINDOWS else ".so"
-            os.system(f"clang++ -shared {allObjs} -o {Globals.tmpDir}/{name}{ext}")
-        case _:
-            print("Error: Unsupported binary type!")
-    return
-
 def buildBinaries() -> None:
     globalFlags:List[str] = lua.makeList(Globals.cfg["GlobalFlags"])
     platformFlags:List[str] = lua.makeList(Globals.cfg["WindowsFlags" if platform.get() == platform.Platform.WINDOWS else "LinuxFlags"])
 
     for bin in lua.makeList(Globals.cfg["Binaries"]):
         srcs:List[str] = lua.makeList(bin["srcs"])
+        objs:List[str] = []
+        for src in srcs:
+            objs.append(f"{Globals.tmpDir}/{os.path.basename(src)}")
+
+        type:clang.BinType = clang.BinType.EXECUTABLE if bin["type"] == "executable" else clang.BinType.SHARED
 
         for src in srcs:
-            compile(globalFlags + platformFlags + lua.makeList(bin["flags"]), src)
-        link(bin["name"], bin["type"], srcs)
+            clang.compile(globalFlags + platformFlags + lua.makeList(bin["flags"]), src, f"{Globals.tmpDir}/{os.path.basename(src)}")
+        clang.link(f"{Globals.tmpDir}/{bin["name"]}", type, objs)
 
         for src in srcs:
-            compile(globalFlags + platformFlags + lua.makeList(bin["flags"]) + ["-DDEBUG"], src)
-        link(bin["name"] + "_d", bin["type"], srcs)
+            clang.compile(globalFlags + platformFlags + lua.makeList(bin["flags"]) + ["-DDEBUG"], src, f"{Globals.tmpDir}/{os.path.basename(src)}")
+        clang.link(f"{Globals.tmpDir}/{bin["name"] + "_d"}", type, objs)
 
     return
 
