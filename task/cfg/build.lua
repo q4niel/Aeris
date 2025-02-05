@@ -1,12 +1,12 @@
-version = {
+Version = {
     major = 0,
     minor = 0,
     patch = 0
 }
 
-directory = "aeris_v" .. version.major .. "." .. version.minor .. "." .. version.patch
+Directory = "aeris_v" .. Version.major .. "." .. Version.minor .. "." .. Version.patch
 
-transfer = {
+Transfer = {
     {src = "src/res", dst = "res"},
 
     {src = "src/task/bin/new_project.py", dst = "task/bin/New-Project"},
@@ -18,19 +18,19 @@ transfer = {
     {src = "task/run.sh", dst = "task/run.sh"}
 }
 
-includes = {
+Includes = {
     "src/eng/aeris_api.hpp",
     "src/eng/core/print.hpp",
     "src/eng/core/print.t.hpp"
 }
 
-globalFlags = {"-std=c++23"}
-windowsFlags = {"-DPLATFORM_WINDOWS"}
-linuxFlags = {"-DPLATFORM_LINUX"}
+GlobalFlags = {"-std=c++23"}
+WindowsFlags = {"-DPLATFORM_WINDOWS"}
+LinuxFlags = {"-DPLATFORM_LINUX"}
 
-binaries = {
+Binaries = {
     {
-        name = "Aeris" .. version.major .. "-Core",
+        name = "Aeris" .. Version.major .. "-Core",
         type = "shared",
         flags = {"-fvisibility=hidden", "-DBUILD_AERIS_API"},
         srcs = {"src/eng/core/print"}
