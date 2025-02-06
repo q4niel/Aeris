@@ -11,6 +11,7 @@ Transfer = {
 
     {src = "src/task/bin/build_project.py", dst = "task/bin/Build-Project"},
     {src = "src/task/bin/new_project.py", dst = "task/bin/New-Project"},
+    {src = "src/task/util", dst = "task/util"},
 
     {src = "task/util", dst = "task/util"},
     {src = "task/requirements.txt", dst = "task/requirements.txt"},

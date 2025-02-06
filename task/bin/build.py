@@ -48,9 +48,23 @@ def createDirectories() -> None:
     return
 
 def transferFiles() -> None:
+    def merge(src, dst) -> None:
+        if not os.path.exists(dst):
+            shutil.copytree(src, dst)
+        else:
+            for item in os.listdir(src):
+                srcPath:str = os.path.join(src, item)
+                dstPath:str = os.path.join(dst, item)
+
+                if os.path.isdir(srcPath):
+                    merge(srcPath, dstPath)
+                else:
+                    shutil.copy(srcPath, dstPath)
+        return
+
     for file in lua.makeList(Globals.cfg["Transfer"]):
         if (os.path.isdir(file["src"])):
-            shutil.copytree(file["src"], f"{Globals.outDir}/{file["dst"]}")
+            merge(file["src"], f"{Globals.outDir}/{file["dst"]}")
         else:
             shutil.copy(file["src"], f"{Globals.outDir}/{file["dst"]}")
     return
