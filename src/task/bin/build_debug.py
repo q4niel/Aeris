@@ -2,9 +2,6 @@ import os
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from util import clang
-from util import lua
-from util import path
 from util import project
 
 def main() -> None:
