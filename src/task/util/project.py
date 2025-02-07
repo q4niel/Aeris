@@ -4,6 +4,11 @@ from typing import List
 from . import path
 from . import lua
 
+class Globals:
+    projDir:str = ""
+    config:dict = []
+    initializedSystems:List[str] = []
+
 def selectProject() -> str:
     def select(path:str) -> bool:
         if not os.path.isabs(path):
@@ -23,9 +28,9 @@ def selectProject() -> str:
     while not select(proj := input("Select Project: ")): pass
     return proj
 
-def checkVersion(engineCfg:dict, projectCfg:dict) -> bool:
+def checkVersion(engineCfg:dict) -> bool:
     eng:dict = engineCfg["AerisVersion"]
-    proj:dict = projectCfg["AerisVersion"]
+    proj:dict = Globals.config["AerisVersion"]
 
     success:bool = (
         (eng.major == proj.major)
@@ -36,37 +41,41 @@ def checkVersion(engineCfg:dict, projectCfg:dict) -> bool:
     if not success:
         print(f"Version Mismatch:")
         print(f"    Aeris: v{eng.major}.{eng.minor}.{eng.patch}")
-        print(f"    {projectCfg["ProjectName"]}: v{proj.major}.{proj.minor}.{proj.patch}")
+        print(f"    {Globals.config["ProjectName"]}: v{proj.major}.{proj.minor}.{proj.patch}")
 
     return success
 
-def createOut(parent:str, projectCfg:str, outSuffix:str) -> str:
+def createOut(parent:str, outSuffix:str) -> str:
     path.safeDir(parent)
     out:str = (
-        f"{parent}/{projectCfg["ProjectName"]}_"
-        f"v{projectCfg["ProjectVersion"].major}"
-        f".{projectCfg["ProjectVersion"].minor}"
-        f".{projectCfg["ProjectVersion"].patch}"
+        f"{parent}/{Globals.config["ProjectName"]}_"
+        f"v{Globals.config["ProjectVersion"].major}"
+        f".{Globals.config["ProjectVersion"].minor}"
+        f".{Globals.config["ProjectVersion"].patch}"
         f"{outSuffix}"
     )
     path.hardDir(out)
     return out
 
-def insertUserApi(config:dict, projDir:str) -> bool:
-    systems:List[str] = (
-        lua.makeList(config["Systems"].inits)
-    +   lua.makeList(config["Systems"].procs)
-    +   lua.makeList(config["Systems"].exits)
-    )
+def getSystemLocation(system:str) -> str:
+    return system.split(";", 1)[0]
 
-    for system in systems:
+def getSystemSignature(system:str) -> str:
+    return system.split(";", 1)[1]
+
+def initSystemFiles() -> bool:
+    for system in (
+        lua.makeList(Globals.config["Systems"].inits)
+    +   lua.makeList(Globals.config["Systems"].procs)
+    +   lua.makeList(Globals.config["Systems"].exits)
+    ):
         if not ";" in system:
             print(f"proj.lua: Invalid System Reference '{system}'")
             print("    => relative_path/file;function")
             return False
 
-        location:str = f"{projDir}/{system.split(";", 1)[0]}"
-        signature:str = system.split(";", 1)[1]
+        location:str = f"{Globals.projDir}/{getSystemLocation(system)}"
+        signature:str = getSystemSignature(system)
 
         if not os.path.exists(location) or os.path.isdir(location):
             print(f"proj.lua: '{location}' file could not be found, is it relative to 'proj.lua'?")
@@ -95,21 +104,31 @@ def insertUserApi(config:dict, projDir:str) -> bool:
         with open(location, "r+") as file:
             content:str = file.read()
             file.seek(0)
-            file.write(content.replace(f"void {signature}()", f"USER_API void {signature}()"))
+            file.write(content.replace(f"void {signature}()", f"#include <user_api.hpp>\nUSER_API void {signature}()"))
             file.truncate()
+        
+        Globals.initializedSystems.append(system)
 
     return True
 
+def cleanupSystemFiles() -> None:
+    for system in Globals.initializedSystems:
+        location:str = getSystemLocation(f"{Globals.projDir}/{system}")
+        os.remove(location)
+        os.rename(f"{location}_", location)
+    return
+
 def build(directorySuffix:str, binarySuffix:str, binaryFlags:List[str]) -> None:
-    projDir:str = selectProject()
-    config:dict = lua.parse(f"{projDir}/proj.lua")
+    Globals.projDir:str = selectProject()
+    Globals.config:dict = lua.parse(f"{Globals.projDir}/proj.lua")
 
-    if not checkVersion(lua.parse(f"res/proj.lua"), config): return
+    if not checkVersion(lua.parse(f"res/proj.lua")): return
 
-    outDir:str = createOut(f"{projDir}/out", config, directorySuffix)
+    outDir:str = createOut(f"{Globals.projDir}/out", directorySuffix)
 
-    if not insertUserApi(config, projDir): return
+    if initSystemFiles(): pass
 
+    cleanupSystemFiles()
     return
 
 def buildRelease() -> None:
