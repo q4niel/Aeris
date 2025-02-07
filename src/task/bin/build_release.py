@@ -4,12 +4,24 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from util import project
 from util import path
+from util import platform
 
 def main() -> None:
     os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-    path.hardDir("tmp")
-    project.buildRelease()
-    path.delDir("tmp")
+
+    plat:str = ""
+    match platform.get():
+        case platform.Platform.WINDOWS:
+            plat = "-DPLATFORM_WINDOWS"
+
+        case platform.Platform.LINUX:
+            plat = "-DPLATFORM_LINUX"
+
+        case platform.Platform.OTHER:
+            print("Unsupported OS!")
+            return
+
+    project.build("", "", [f"-I{os.getcwd()}/inc", f"-I{os.getcwd()}/res", plat, "-DBUILD_USER_API"])
     return
 
 if __name__ == "__main__": main()

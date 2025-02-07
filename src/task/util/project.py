@@ -3,6 +3,7 @@ import shutil
 from typing import List
 from . import path
 from . import lua
+from . import clang
 
 class Globals:
     projDir:str = ""
@@ -78,7 +79,7 @@ def initSystemFiles() -> bool:
         signature:str = getSystemSignature(system)
 
         if not os.path.exists(location) or os.path.isdir(location):
-            print(f"proj.lua: '{location}' file could not be found, is it relative to 'proj.lua'?")
+            print(f"proj.lua: '{getSystemLocation(system)}' file could not be found, is it relative to 'proj.lua'?")
             return False
 
         with open(location, "r") as file:
@@ -118,7 +119,31 @@ def cleanupSystemFiles() -> None:
         os.rename(f"{location}_", location)
     return
 
-def build(directorySuffix:str, binarySuffix:str, binaryFlags:List[str]) -> None:
+def compileSources(flags:List[str]) -> bool:
+    sources:List[str] = lua.makeList(Globals.config["Sources"])
+
+    for source in sources:
+        src:str = f"{Globals.projDir}/{source}"
+
+        if not os.path.exists(src) or os.path.isdir(src):
+            print(f"proj.lua: '{source}' file could not be found, is it relative to 'proj.lua'?")
+            return False
+
+        if not src.endswith(".cpp"):
+            print(f"proj.lua: '{source}' is not a valid C++ source file. It must end in '.cpp'")
+            return False
+
+    objsDir:str = f"{Globals.projDir}/objects"
+    path.hardDir(objsDir)
+
+    for source in sources:
+        src:str = f"{Globals.projDir}/{source[:-4]}"
+        dst:str = f"{objsDir}/{os.path.basename(source)[:-4]}"
+        clang.compile(flags, src, dst)
+
+    return True
+
+def build(directorySuffix:str, binarySuffix:str, compilerFlags:List[str]) -> None:
     Globals.projDir:str = selectProject()
     Globals.config:dict = lua.parse(f"{Globals.projDir}/proj.lua")
 
@@ -126,15 +151,8 @@ def build(directorySuffix:str, binarySuffix:str, binaryFlags:List[str]) -> None:
 
     outDir:str = createOut(f"{Globals.projDir}/out", directorySuffix)
 
-    if initSystemFiles(): pass
+    if initSystemFiles():
+        compileSources(compilerFlags)
 
     cleanupSystemFiles()
-    return
-
-def buildRelease() -> None:
-    build("", "", [])
-    return
-
-def buildDebug() -> None:
-    build("_debug", "_d", ["-DDEBUG"])
     return
