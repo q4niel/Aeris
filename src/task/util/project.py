@@ -7,6 +7,7 @@ from . import clang
 
 class Globals:
     projDir:str = ""
+    outDir:str = ""
     config:dict = []
     initializedSystems:List[str] = []
 
@@ -112,11 +113,13 @@ def initSystemFiles() -> bool:
 
     return True
 
-def cleanupSystemFiles() -> None:
+def cleanup() -> None:
     for system in Globals.initializedSystems:
         location:str = getSystemLocation(f"{Globals.projDir}/{system}")
         os.remove(location)
         os.rename(f"{location}_", location)
+
+    path.delDir(f"{Globals.outDir}/objects")
     return
 
 def compileSources(flags:List[str]) -> bool:
@@ -133,8 +136,10 @@ def compileSources(flags:List[str]) -> bool:
             print(f"proj.lua: '{source}' is not a valid C++ source file. It must end in '.cpp'")
             return False
 
-    objsDir:str = f"{Globals.projDir}/objects"
+    objsDir:str = f"{Globals.outDir}/objects"
     path.hardDir(objsDir)
+
+    clang.compile(flags, "res/main__", f"{objsDir}/main__")
 
     for source in sources:
         src:str = f"{Globals.projDir}/{source[:-4]}"
@@ -143,16 +148,34 @@ def compileSources(flags:List[str]) -> bool:
 
     return True
 
-def build(directorySuffix:str, binarySuffix:str, compilerFlags:List[str]) -> None:
-    Globals.projDir:str = selectProject()
-    Globals.config:dict = lua.parse(f"{Globals.projDir}/proj.lua")
+def linkBinary(flags:List[str], libs:List[str]) -> bool:
+    prevCWD:str = os.getcwd()
+
+    path.hardDir(f"{Globals.outDir}/bin")
+    os.chdir("bin")
+
+    objects:List[str] = []
+    for object in os.listdir(f"{Globals.outDir}/objects"):
+        objects.append(f"{Globals.outDir}/objects/{object[:-2]}")
+
+    clang.link(f"{Globals.outDir}/bin/{Globals.config["ExecutableName"]}", clang.BinType.EXECUTABLE, flags, libs, objects)
+
+    os.chdir(prevCWD)
+    return True
+
+def build(directorySuffix:str, binarySuffix:str, compileFlags:List[str], linkFlags:List[str]) -> None:
+    Globals.projDir = selectProject()
+    Globals.config = lua.parse(f"{Globals.projDir}/proj.lua")
+    Globals.outDir = createOut(f"{Globals.projDir}/out", directorySuffix)
 
     if not checkVersion(lua.parse(f"res/proj.lua")): return
 
-    outDir:str = createOut(f"{Globals.projDir}/out", directorySuffix)
+    if (
+        not initSystemFiles()
+    or  not compileSources(compileFlags)
+    or  not linkBinary(linkFlags, ["Aeris0-Core"])
+    ):
+        shutil.rmtree(Globals.outDir)
 
-    if initSystemFiles():
-        compileSources(compilerFlags)
-
-    cleanupSystemFiles()
+    cleanup()
     return

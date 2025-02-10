@@ -29,11 +29,11 @@ def buildBinaries() -> None:
 
         for src in srcs:
             clang.compile(globalFlags + platformFlags + lua.makeList(bin["flags"]), src, f"{Globals.tmpDir}/{os.path.basename(src)}")
-        clang.link(f"{Globals.tmpDir}/{bin["name"]}", type, objs)
+        clang.link(f"{Globals.tmpDir}/{bin["name"]}", type, [], [], objs)
 
         for src in srcs:
             clang.compile(globalFlags + platformFlags + lua.makeList(bin["flags"]) + ["-DDEBUG"], src, f"{Globals.tmpDir}/{os.path.basename(src)}")
-        clang.link(f"{Globals.tmpDir}/{bin["name"] + "_d"}", type, objs)
+        clang.link(f"{Globals.tmpDir}/{bin["name"] + "_d"}", type, [], [], objs)
 
     return
 
