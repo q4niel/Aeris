@@ -3,7 +3,7 @@ $files = Get-ChildItem -Path "$($task)\bin"
 $tasks = @()
 
 if (-not (Test-Path $("$task\env") -PathType Container)) {
-    py -3 -B -m venv task/env
+    py -3 -B -m venv $task\env
     & "$($task)\env\Scripts\Activate.ps1"
     pip install -r $("$task\requirements.txt")
     deactivate

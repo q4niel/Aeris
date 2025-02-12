@@ -27,20 +27,20 @@ def setName() -> bool:
     return True
 
 def main() -> None:
+    os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
     while not setDir(): pass
     while not setName(): pass
 
     os.mkdir(Globals.path)
 
-    cfgTemplate:str = f"{os.path.dirname(os.path.dirname(os.path.dirname(sys.argv[0])))}/res/proj.lua"
     cfg:str = f"{Globals.path}/proj.lua"
-
-    shutil.copy(cfgTemplate, cfg)
+    shutil.copy("res/proj.lua", cfg)
 
     with open(cfg, "r+") as file:
         content:str = file.read()
         file.seek(0)
-        file.write(content.replace("__NAME__", Globals.name))
+        file.write(content.replace("__PROJECT_NAME__", Globals.name))
         file.truncate()
 
     return
