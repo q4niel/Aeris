@@ -9,7 +9,6 @@ class Globals:
     projDir:str = ""
     outDir:str = ""
     config:dict = []
-    initializedSystems:List[str] = []
 
 def selectProject() -> str:
     def select(path:str) -> bool:
@@ -65,60 +64,7 @@ def getSystemLocation(system:str) -> str:
 def getSystemSignature(system:str) -> str:
     return system.split(";", 1)[1]
 
-def initSystemFiles() -> bool:
-    for system in (
-        lua.makeList(Globals.config["Systems"].inits)
-    +   lua.makeList(Globals.config["Systems"].procs)
-    +   lua.makeList(Globals.config["Systems"].exits)
-    ):
-        if not ";" in system:
-            print(f"proj.lua: Invalid System Reference '{system}'")
-            print("    => relative_path/file;function")
-            return False
-
-        location:str = f"{Globals.projDir}/{getSystemLocation(system)}"
-        signature:str = getSystemSignature(system)
-
-        if not os.path.exists(location) or os.path.isdir(location):
-            print(f"proj.lua: '{getSystemLocation(system)}' file could not be found, is it relative to 'proj.lua'?")
-            return False
-
-        with open(location, "r") as file:
-            content:str = file.read()
-            found = content.find(signature)
-
-            if found == -1:
-                print(f"proj.lua: '{signature}' could not be found")
-                return False
-
-            if content[found - 5:found] != "void ":
-                print(f"proj.lua: '{signature}' must return 'void'")
-                print(f"    => void {signature}")
-                return False
-
-            if content[found+len(signature)] != "(" or content[found+1+len(signature)] != ")":
-                print(f"proj.lua: '{signature}' shall take zero arguments")
-                print(f"    => {signature}()")
-                return False
-        
-        shutil.copy(f"{location}", f"{location}_")
-
-        with open(location, "r+") as file:
-            content:str = file.read()
-            file.seek(0)
-            file.write(content.replace(f"void {signature}()", f"#include <user_api.hpp>\nUSER_API void {signature}()"))
-            file.truncate()
-        
-        Globals.initializedSystems.append(system)
-
-    return True
-
 def cleanup() -> None:
-    for system in Globals.initializedSystems:
-        location:str = getSystemLocation(f"{Globals.projDir}/{system}")
-        os.remove(location)
-        os.rename(f"{location}_", location)
-
     path.delDir(f"{Globals.outDir}/objects")
     return
 
@@ -171,8 +117,7 @@ def build(directorySuffix:str, binarySuffix:str, compileFlags:List[str], linkFla
     if not checkVersion(lua.parse(f"res/proj.lua")): return
 
     if (
-        not initSystemFiles()
-    or  not compileSources(compileFlags)
+        not compileSources(compileFlags)
     or  not linkBinary(linkFlags, ["Aeris0-Core"])
     ):
         shutil.rmtree(Globals.outDir)
