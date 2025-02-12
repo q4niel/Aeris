@@ -13,10 +13,4 @@ ProjectVersion = {
     patch = 0
 }
 
-Systems = {
-    inits = {},
-    procs = {},
-    exits = {}
-}
-
 Sources = {}
