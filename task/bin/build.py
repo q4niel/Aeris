@@ -11,9 +11,16 @@ from util import path
 from util import platform
 
 class Globals:
-    cfg:dict = lua.parse("task/cfg/build.lua")
-    tmpDir:str = "tmp"
-    outDir:str = f"out/{cfg["Directory"]}"
+    cfg:dict = []
+    tmpDir:str = ""
+    outDir:str = ""
+
+    @staticmethod
+    def init() -> None:
+        Globals.cfg = lua.parse("task/cfg/build.lua")
+        Globals.tmpDir = "tmp"
+        Globals.outDir = f"out/{Globals.cfg["Directory"]}"
+        return
 
 def buildBinaries() -> None:
     globalFlags:List[str] = lua.makeList(Globals.cfg["GlobalFlags"])
@@ -104,6 +111,8 @@ def transferBinaries() -> None:
 
 def main() -> None:
     os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+    Globals.init()
+
     if (platform.get() == platform.Platform.OTHER):
         print("Error: Unsupported OS!")
         return
