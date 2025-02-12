@@ -32,9 +32,8 @@ def main() -> None:
             plat,
             "-DBUILD_USER_API"
         ],
-        [
-            rpathSetting
-        ]
+        [rpathSetting],
+        ["Aeris0-Core"]
     )
     return
 

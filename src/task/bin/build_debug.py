@@ -33,9 +33,8 @@ def main() -> None:
             "-DBUILD_USER_API",
             "-DDEBUG"
         ],
-        [
-            rpathSetting
-        ]
+        [rpathSetting],
+        ["Aeris0-Core_d"]
     )
     return
 

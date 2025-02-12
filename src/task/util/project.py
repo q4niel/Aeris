@@ -109,7 +109,7 @@ def linkBinary(flags:List[str], libs:List[str]) -> bool:
     os.chdir(prevCWD)
     return True
 
-def build(directorySuffix:str, binarySuffix:str, compileFlags:List[str], linkFlags:List[str]) -> None:
+def build(directorySuffix:str, binarySuffix:str, compileFlags:List[str], linkFlags:List[str], linkLibs:List[str]) -> None:
     Globals.projDir = selectProject()
     Globals.config = lua.parse(f"{Globals.projDir}/proj.lua")
     Globals.outDir = createOut(f"{Globals.projDir}/out", directorySuffix)
@@ -118,7 +118,7 @@ def build(directorySuffix:str, binarySuffix:str, compileFlags:List[str], linkFla
 
     if (
         not compileSources(compileFlags)
-    or  not linkBinary(linkFlags, ["Aeris0-Core"])
+    or  not linkBinary(linkFlags, linkLibs)
     ):
         shutil.rmtree(Globals.outDir)
 
