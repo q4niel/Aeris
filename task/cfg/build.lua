@@ -23,8 +23,11 @@ Transfer = {
 
 Includes = {
     "src/eng/aeris_api.hpp",
+
     "src/eng/core/print.hpp",
-    "src/eng/core/print.t.hpp"
+    "src/eng/core/print.t.hpp",
+
+    "src/eng/core/behaviour/behaviour.hpp"
 }
 
 GlobalFlags = {"-std=c++23"}
@@ -36,6 +39,10 @@ Binaries = {
         name = "Aeris" .. Version.major .. "-Core",
         type = "shared",
         flags = {"-fvisibility=hidden", "-DBUILD_AERIS_API"},
-        srcs = {"src/eng/core/print"}
+        srcs = {
+            "src/eng/core/print",
+
+            "src/eng/core/behaviour/behaviour"
+        }
     }
 }
